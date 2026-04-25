@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JP Jewellers | Management Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #eef2f5;
+            font-family: 'Arial', sans-serif;
+            padding: 20px;
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .dashboard {
+            padding: 25px;
+        }
+
+        .header {
+            border: 1px solid #000;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .logo h2 {
+            color: #1e466e;
+            font-size: 20px;
+        }
+        .logo p {
+            font-size: 11px;
+            color: #666;
+        }
+        .buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+        .btn-green { background: #28a745; color: white; }
+        .btn-orange { background: #fd7e14; color: white; }
+        .btn-blue { background: #1e466e; color: white; }
+        .btn-yellow { background: #ffc107; color: #000; }
+        .btn-cyan { background: #17a2b8; color: white; }
+        .btn-gray { background: #6c757d; color: white; }
+        .btn-red { background: #dc3545; color: white; }
+        .btn-purple { background: #6f42c1; color: white; }
+        .btn-teal { background: #20c997; color: white; }
+        .btn:hover { opacity: 0.85; transform: translateY(-1px); }
+
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #000;
+        }
+        .tab {
+            padding: 10px 25px;
+            background: #f0f2f5;
+            border: 1px solid #aaa;
+            border-bottom: none;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 8px 8px 0 0;
+        }
+        .tab.active {
+            background: #1e466e;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            border: 1px solid #000;
+            padding: 15px;
+            background: white;
+        }
+        .stat-card h4 {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        .stat-card .value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #1e466e;
+        }
+
+        .filters {
+            border: 1px solid #000;
+            padding: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: space-between;
+            align-items: center;
+            background: #fafafa;
+        }
+        .search-box {
+            border: 1px solid #aaa;
+            padding: 6px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            background: white;
+        }
+        .search-box input {
+            border: none;
+            outline: none;
+            width: 100%;
+        }
+        .filter-select {
+            padding: 6px 10px;
+            border: 1px solid #aaa;
+            background: white;
+        }
+        .sort-btn {
+            padding: 6px 12px;
+            border: 1px solid #aaa;
+            background: white;
+            cursor: pointer;
+        }
+        .sort-btn:hover {
+            background: #e9ecef;
+        }
+        .sort-btn.active {
+            background: #1e466e;
+            color: white;
+        }
+
+        .table-wrapper {
+            border: 1px solid #000;
+            overflow-x: auto;
+            background: white;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background: #e9ecef;
+            font-weight: bold;
+        }
+        tr:hover {
+            background: #f5f5f5;
+        }
+        .action-btn {
+            background: none;
+            border: 1px solid #aaa;
+            padding: 4px 8px;
+            margin: 0 3px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        .action-btn.view { color: #1e466e; }
+        .action-btn.delete { color: #dc3545; }
+        .action-btn:hover { background: #f0f0f0; }
+        .empty-row {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            visibility: hidden;
+            opacity: 0;
+            transition: 0.2s;
+        }
+        .modal.active {
+            visibility: visible;
+            opacity: 1;
+        }
+        .modal-box {
+            background: white;
+            border: 1px solid #000;
+            max-width: 500px;
+            width: 90%;
+            padding: 25px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #000;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        .modal-header button {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px solid #ddd;
+        }
+        .detail-row {
+            display: flex;
+            padding: 6px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .detail-label {
+            width: 110px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            z-index: 1001;
+            animation: slideIn 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @media print {
+            .header .buttons, .filters, .action-btn, .tab { display: none !important; }
+            .stat-card { border: 1px solid #000; }
+        }
+    </style>
+</head>
+<body>
+<div class="dashboard-container">
+    <div class="dashboard">
+        <!-- Header with ALL buttons at top -->
+        <div class="header">
+            <div class="logo">
+                <h2><i class="fas fa-gem"></i> J.P JEWELLERS</h2>
+                <p>Management Dashboard | GSTIN: 29AAAFJ1234P1ZR | Lalganj, Bairia, Ballia - 277216</p>
+            </div>
+            <div class="buttons">
+                <!-- Create Buttons -->
+                <button class="btn btn-green" id="newInvoiceBtn"><i class="fas fa-plus-circle"></i> New Sales</button>
+                <button class="btn btn-orange" id="newPurchaseBtn"><i class="fas fa-plus-circle"></i> New Purchase</button>
+                <button class="btn btn-purple" id="ledgerBtn"><i class="fas fa-book"></i> Ledger</button>
+                <!-- Stock Review Button - OPENS stocks.html -->
+                <button class="btn btn-teal" id="stockReviewBtn"><i class="fas fa-boxes"></i> Stock Review</button>
+                <!-- Action Buttons -->
+                <button class="btn btn-yellow" id="backupBtn"><i class="fas fa-download"></i> Backup</button>
+                <button class="btn btn-cyan" id="restoreBtn"><i class="fas fa-upload"></i> Restore</button>
+                <button class="btn btn-blue" id="printBtn"><i class="fas fa-print"></i> Print</button>
+                <button class="btn btn-gray" id="refreshBtn"><i class="fas fa-sync"></i> Refresh</button>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <div class="tab active" data-tab="sales">📄 Sales Invoices</div>
+            <div class="tab" data-tab="purchase">🛒 Purchase Bills</div>
+        </div>
+
+        <!-- Sales Tab -->
+        <div id="salesTab" class="tab-content active">
+            <div class="stats">
+                <div class="stat-card"><h4>Total Invoices</h4><div class="value" id="totalSales">0</div></div>
+                <div class="stat-card"><h4>Total Revenue</h4><div class="value" id="totalRevenue">₹0</div></div>
+                <div class="stat-card"><h4>Unique Customers</h4><div class="value" id="uniqueCustomers">0</div></div>
+                <div class="stat-card"><h4>Avg Invoice</h4><div class="value" id="avgSales">₹0</div></div>
+            </div>
+
+            <div class="filters">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="salesSearch" placeholder="Search by customer, invoice...">
+                </div>
+                <select id="paymentFilter" class="filter-select">
+                    <option value="">All Payments</option>
+                    <option value="Cash">Cash</option>
+                    <option value="UPI">UPI</option>
+                    <option value="Card">Card</option>
+                </select>
+                <input type="date" id="dateFilter" class="filter-select">
+                <button class="sort-btn" id="sortSalesNew">Newest</button>
+                <button class="sort-btn" id="sortSalesOld">Oldest</button>
+                <button class="sort-btn" id="sortSalesHigh">Highest</button>
+                <button id="clearSalesFilter" class="btn-gray btn" style="padding:6px 12px;">Clear</button>
+            </div>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr><th>Invoice No</th><th>Customer Name</th><th>Date</th><th>Amount</th><th>Payment</th><th>Items</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody id="salesBody">
+                        <tr><td colspan="7" class="empty-row">No invoices found. Create your first invoice!</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Purchase Tab -->
+        <div id="purchaseTab" class="tab-content">
+            <div class="stats">
+                <div class="stat-card"><h4>Total Purchases</h4><div class="value" id="totalPurchase">0</div></div>
+                <div class="stat-card"><h4>Total Value</h4><div class="value" id="totalPurchaseValue">₹0</div></div>
+                <div class="stat-card"><h4>Unique Suppliers</h4><div class="value" id="uniqueSuppliers">0</div></div>
+                <div class="stat-card"><h4>Avg Purchase</h4><div class="value" id="avgPurchase">₹0</div></div>
+            </div>
+
+            <div class="filters">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="purchaseSearch" placeholder="Search by supplier, bill no...">
+                </div>
+                <select id="billTypeFilter" class="filter-select">
+                    <option value="">All Types</option>
+                    <option value="GST Purchase">GST Purchase</option>
+                    <option value="Non-GST Purchase">Non-GST Purchase</option>
+                    <option value="Cash Purchase">Cash Purchase</option>
+                </select>
+                <input type="date" id="purchaseDateFilter" class="filter-select">
+                <button class="sort-btn" id="sortPurchaseNew">Newest</button>
+                <button class="sort-btn" id="sortPurchaseOld">Oldest</button>
+                <button class="sort-btn" id="sortPurchaseHigh">Highest</button>
+                <button id="clearPurchaseFilter" class="btn-gray btn" style="padding:6px 12px;">Clear</button>
+            </div>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr><th>Bill No</th><th>Supplier Name</th><th>Date</th><th>Amount</th><th>Bill Type</th><th>Items</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody id="purchaseBody">
+                        <tr><td colspan="7" class="empty-row">No purchase bills found. Create your first purchase!</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- View Modal -->
+<div id="viewModal" class="modal">
+    <div class="modal-box">
+        <div class="modal-header"><h3>Details</h3><button class="close-modal" onclick="closeModal('viewModal')">&times;</button></div>
+        <div id="viewContent"></div>
+        <div class="modal-footer"><button class="btn-gray" onclick="closeModal('viewModal')">Close</button></div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div id="deleteModal" class="modal">
+    <div class="modal-box">
+        <div class="modal-header"><h3>Confirm Delete</h3><button class="close-modal" onclick="closeModal('deleteModal')">&times;</button></div>
+        <p>⚠️ This action will permanently delete this record. Cannot be undone!</p>
+        <div class="modal-footer">
+            <button class="btn-gray" onclick="closeModal('deleteModal')">Cancel</button>
+            <button class="btn-red" id="confirmDeleteBtn">Delete Permanently</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let salesData = [];
+    let purchaseData = [];
+    let pendingDelete = { id: null, type: null };
+    
+    let salesFilter = { search: '', payment: '', date: '', sort: 'newest' };
+    let purchaseFilter = { search: '', billType: '', date: '', sort: 'newest' };
+
+    function loadData() {
+        let storedSales = localStorage.getItem('jp_jewellers_invoices_list');
+        if (storedSales) {
+            try {
+                salesData = JSON.parse(storedSales);
+                if (!Array.isArray(salesData)) salesData = [];
+            } catch(e) { salesData = []; }
+        } else {
+            salesData = [];
+        }
+        
+        let storedPurchase = localStorage.getItem('jp_purchases_list');
+        if (storedPurchase) {
+            try {
+                purchaseData = JSON.parse(storedPurchase);
+                if (!Array.isArray(purchaseData)) purchaseData = [];
+            } catch(e) { purchaseData = []; }
+        } else {
+            purchaseData = [];
+        }
+        
+        updateStats();
+        renderSales();
+        renderPurchase();
+    }
+
+    function saveSales() {
+        localStorage.setItem('jp_jewellers_invoices_list', JSON.stringify(salesData));
+    }
+
+    function savePurchase() {
+        localStorage.setItem('jp_purchases_list', JSON.stringify(purchaseData));
+    }
+
+    function updateStats() {
+        let totalSales = salesData.length;
+        let totalRevenue = salesData.reduce((s, i) => s + (i.amount || 0), 0);
+        let uniqueCust = new Set(salesData.map(i => i.customerName).filter(Boolean)).size;
+        let avgSales = totalSales > 0 ? totalRevenue / totalSales : 0;
+        document.getElementById('totalSales').innerText = totalSales;
+        document.getElementById('totalRevenue').innerHTML = `₹${totalRevenue.toLocaleString('en-IN', {minimumFractionDigits:2})}`;
+        document.getElementById('uniqueCustomers').innerText = uniqueCust;
+        document.getElementById('avgSales').innerHTML = `₹${avgSales.toLocaleString('en-IN', {minimumFractionDigits:2})}`;
+        
+        let totalPurchase = purchaseData.length;
+        let totalPurchaseVal = purchaseData.reduce((s, i) => s + (i.amount || 0), 0);
+        let uniqueSupp = new Set(purchaseData.map(i => i.partyName).filter(Boolean)).size;
+        let avgPurchase = totalPurchase > 0 ? totalPurchaseVal / totalPurchase : 0;
+        document.getElementById('totalPurchase').innerText = totalPurchase;
+        document.getElementById('totalPurchaseValue').innerHTML = `₹${totalPurchaseVal.toLocaleString('en-IN', {minimumFractionDigits:2})}`;
+        document.getElementById('uniqueSuppliers').innerText = uniqueSupp;
+        document.getElementById('avgPurchase').innerHTML = `₹${avgPurchase.toLocaleString('en-IN', {minimumFractionDigits:2})}`;
+    }
+
+    function renderSales() {
+        let filtered = [...salesData];
+        
+        if (salesFilter.search) {
+            let term = salesFilter.search.toLowerCase();
+            filtered = filtered.filter(i => 
+                (i.customerName && i.customerName.toLowerCase().includes(term)) ||
+                (i.invoiceNo && i.invoiceNo.toLowerCase().includes(term))
+            );
+        }
+        if (salesFilter.payment) {
+            filtered = filtered.filter(i => i.paymentMode === salesFilter.payment);
+        }
+        if (salesFilter.date) {
+            filtered = filtered.filter(i => i.date === salesFilter.date);
+        }
+        
+        if (salesFilter.sort === 'newest') {
+            filtered.sort((a,b) => new Date(b.date?.split('/').reverse().join('-') || 0) - new Date(a.date?.split('/').reverse().join('-') || 0));
+        } else if (salesFilter.sort === 'oldest') {
+            filtered.sort((a,b) => new Date(a.date?.split('/').reverse().join('-') || 0) - new Date(b.date?.split('/').reverse().join('-') || 0));
+        } else if (salesFilter.sort === 'highest') {
+            filtered.sort((a,b) => (b.amount || 0) - (a.amount || 0));
+        }
+        
+        let tbody = document.getElementById('salesBody');
+        if (filtered.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="empty-row">No invoices found</td></tr>';
+            return;
+        }
+        
+        let html = '';
+        filtered.forEach(inv => {
+            let items = inv.items?.map(i => i.itemDesc || i.description || 'Item').join(', ') || '-';
+            html += `<tr>
+                <td>${inv.invoiceNo || '-'}</td>
+                <td><strong>${escapeHtml(inv.customerName || '-')}</strong></td>
+                <td>${inv.date || '-'}</td>
+                <td>₹${(inv.amount || 0).toLocaleString('en-IN', {minimumFractionDigits:2})}</td>
+                <td><span style="padding:2px 6px; border:1px solid #aaa; border-radius:3px;">${inv.paymentMode || 'Cash'}</span></td>
+                <td>${escapeHtml(items.substring(0, 40))}${items.length > 40 ? '...' : ''}</td>
+                <td>
+                    <button class="action-btn view" onclick="viewSales('${inv.invoiceNo}')"><i class="fas fa-eye"></i> View</button>
+                    <button class="action-btn delete" onclick="confirmDelete('${inv.invoiceNo}', 'sales')"><i class="fas fa-trash"></i> Del</button>
+                </td>
+            </tr>`;
+        });
+        tbody.innerHTML = html;
+    }
+
+    function renderPurchase() {
+        let filtered = [...purchaseData];
+        
+        if (purchaseFilter.search) {
+            let term = purchaseFilter.search.toLowerCase();
+            filtered = filtered.filter(i => 
+                (i.partyName && i.partyName.toLowerCase().includes(term)) ||
+                (i.purchaseNo && i.purchaseNo.toLowerCase().includes(term))
+            );
+        }
+        if (purchaseFilter.billType) {
+            filtered = filtered.filter(i => i.billType === purchaseFilter.billType);
+        }
+        if (purchaseFilter.date) {
+            filtered = filtered.filter(i => i.purchaseDate === purchaseFilter.date);
+        }
+        
+        if (purchaseFilter.sort === 'newest') {
+            filtered.sort((a,b) => new Date(b.purchaseDate?.split('/').reverse().join('-') || 0) - new Date(a.purchaseDate?.split('/').reverse().join('-') || 0));
+        } else if (purchaseFilter.sort === 'oldest') {
+            filtered.sort((a,b) => new Date(a.purchaseDate?.split('/').reverse().join('-') || 0) - new Date(b.purchaseDate?.split('/').reverse().join('-') || 0));
+        } else if (purchaseFilter.sort === 'highest') {
+            filtered.sort((a,b) => (b.amount || 0) - (a.amount || 0));
+        }
+        
+        let tbody = document.getElementById('purchaseBody');
+        if (filtered.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="empty-row">No purchase bills found</td></tr>';
+            return;
+        }
+        
+        let html = '';
+        filtered.forEach(p => {
+            let items = p.items?.map(i => i.itemDesc || i.description || 'Item').join(', ') || '-';
+            html += `<tr>
+                <td>${p.purchaseNo || '-'}</td>
+                <td><strong>${escapeHtml(p.partyName || '-')}</strong></td>
+                <td>${p.purchaseDate || '-'}</td>
+                <td>₹${(p.amount || 0).toLocaleString('en-IN', {minimumFractionDigits:2})}</td>
+                <td><span style="padding:2px 6px; border:1px solid #aaa; border-radius:3px;">${p.billType || 'GST Purchase'}</span></td>
+                <td>${escapeHtml(items.substring(0, 40))}${items.length > 40 ? '...' : ''}</td>
+                <td>
+                    <button class="action-btn view" onclick="viewPurchase('${p.purchaseNo}')"><i class="fas fa-eye"></i> View</button>
+                    <button class="action-btn delete" onclick="confirmDelete('${p.purchaseNo}', 'purchase')"><i class="fas fa-trash"></i> Del</button>
+                </td>
+            </tr>`;
+        });
+        tbody.innerHTML = html;
+    }
+
+    function viewSales(id) {
+        let item = salesData.find(i => i.invoiceNo === id);
+        if (!item) return;
+        let itemsHtml = item.items?.map((it, idx) => `<div><strong>${idx+1}. ${escapeHtml(it.itemDesc || it.description || 'Item')}</strong> - ₹${(it.total || it.rowTotal || 0).toLocaleString('en-IN', {minimumFractionDigits:2})}</div>`).join('') || '-';
+        document.getElementById('viewContent').innerHTML = `
+            <div class="detail-row"><div class="detail-label">Invoice No:</div><div>${item.invoiceNo}</div></div>
+            <div class="detail-row"><div class="detail-label">Customer:</div><div>${escapeHtml(item.customerName || '-')}</div></div>
+            <div class="detail-row"><div class="detail-label">Date:</div><div>${item.date || '-'}</div></div>
+            <div class="detail-row"><div class="detail-label">Payment:</div><div>${item.paymentMode || 'Cash'}</div></div>
+            <div class="detail-row"><div class="detail-label">Items:</div><div>${itemsHtml}</div></div>
+            <div class="detail-row"><div class="detail-label">Total:</div><div><strong>₹${(item.amount || 0).toLocaleString('en-IN', {minimumFractionDigits:2})}</strong></div></div>
+        `;
+        openModal('viewModal');
+    }
+
+    function viewPurchase(id) {
+        let item = purchaseData.find(i => i.purchaseNo === id);
+        if (!item) return;
+        let itemsHtml = item.items?.map((it, idx) => `<div><strong>${idx+1}. ${escapeHtml(it.itemDesc || it.description || 'Item')}</strong> - Qty:${it.qty || 0} × ₹${it.rate || 0} = ₹${((it.qty||0)*(it.rate||0)).toLocaleString('en-IN', {minimumFractionDigits:2})}</div>`).join('') || '-';
+        document.getElementById('viewContent').innerHTML = `
+            <div class="detail-row"><div class="detail-label">Bill No:</div><div>${item.purchaseNo}</div></div>
+            <div class="detail-row"><div class="detail-label">Supplier:</div><div>${escapeHtml(item.partyName || '-')}</div></div>
+            <div class="detail-row"><div class="detail-label">Date:</div><div>${item.purchaseDate || '-'}</div></div>
+            <div class="detail-row"><div class="detail-label">Bill Type:</div><div>${item.billType || 'GST Purchase'}</div></div>
+            <div class="detail-row"><div class="detail-label">Items:</div><div>${itemsHtml}</div></div>
+            <div class="detail-row"><div class="detail-label">Total:</div><div><strong>₹${(item.amount || 0).toLocaleString('en-IN', {minimumFractionDigits:2})}</strong></div></div>
+        `;
+        openModal('viewModal');
+    }
+
+    function confirmDelete(id, type) {
+        pendingDelete = { id: id, type: type };
+        openModal('deleteModal');
+    }
+
+    function deleteRecord() {
+        if (pendingDelete.type === 'sales') {
+            salesData = salesData.filter(i => i.invoiceNo !== pendingDelete.id);
+            saveSales();
+            updateStats();
+            renderSales();
+            showToast('✓ Invoice deleted permanently');
+        } else if (pendingDelete.type === 'purchase') {
+            purchaseData = purchaseData.filter(i => i.purchaseNo !== pendingDelete.id);
+            savePurchase();
+            updateStats();
+            renderPurchase();
+            showToast('✓ Purchase bill deleted permanently');
+        }
+        closeModal('deleteModal');
+        pendingDelete = { id: null, type: null };
+    }
+
+    function backupData() {
+        let backup = {
+            invoices: salesData,
+            purchases: purchaseData,
+            backupDate: new Date().toISOString()
+        };
+        let blob = new Blob([JSON.stringify(backup, null, 2)], {type: 'application/json'});
+        let url = URL.createObjectURL(blob);
+        let a = document.createElement('a');
+        a.href = url;
+        a.download = `jp_backup_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('✅ Backup saved!');
+    }
+
+    function restoreData() {
+        let input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+        input.onchange = (e) => {
+            let file = e.target.files[0];
+            if (!file) return;
+            let reader = new FileReader();
+            reader.onload = (ev) => {
+                try {
+                    let data = JSON.parse(ev.target.result);
+                    if (data.invoices) salesData = data.invoices;
+                    if (data.purchases) purchaseData = data.purchases;
+                    saveSales();
+                    savePurchase();
+                    updateStats();
+                    renderSales();
+                    renderPurchase();
+                    showToast('✅ Data restored!');
+                } catch(err) { alert('Invalid backup file'); }
+            };
+            reader.readAsText(file);
+        };
+        input.click();
+    }
+
+    function printDashboard() {
+        window.print();
+    }
+
+    function refreshAll() {
+        loadData();
+        showToast('🔄 Refreshed');
+    }
+
+    function showToast(msg) {
+        let toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerHTML = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2500);
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
+    }
+
+    function openModal(id) {
+        document.getElementById(id).classList.add('active');
+    }
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('active');
+    }
+
+    function switchTab(tabName) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.getElementById(tabName + 'Tab').classList.add('active');
+        document.querySelector(`.tab[data-tab="${tabName}"]`).classList.add('active');
+    }
+
+    // ========== ALL BUTTONS AT TOP - EVENT LISTENERS ==========
+    document.getElementById('newInvoiceBtn').onclick = function() {
+        window.location.href = 'invoice.html';
+    };
+    
+    document.getElementById('newPurchaseBtn').onclick = function() {
+        window.location.href = 'purchasebill.html';
+    };
+    document.getElementById('ledgerBtn').onclick = function() {
+    window.location.href = 'ledger.html';
+};
+    // STOCK REVIEW BUTTON - OPENS stocks.html
+    document.getElementById('stockReviewBtn').onclick = function() {
+        window.location.href = 'stocks.html';
+    };
+    
+    document.getElementById('backupBtn').onclick = backupData;
+    document.getElementById('restoreBtn').onclick = restoreData;
+    document.getElementById('printBtn').onclick = printDashboard;
+    document.getElementById('refreshBtn').onclick = refreshAll;
+    document.getElementById('confirmDeleteBtn').onclick = deleteRecord;
+    
+    // Sales filters
+    document.getElementById('salesSearch').oninput = (e) => { salesFilter.search = e.target.value; renderSales(); };
+    document.getElementById('paymentFilter').onchange = (e) => { salesFilter.payment = e.target.value; renderSales(); };
+    document.getElementById('dateFilter').onchange = (e) => { salesFilter.date = e.target.value; renderSales(); };
+    document.getElementById('sortSalesNew').onclick = () => { salesFilter.sort = 'newest'; renderSales(); };
+    document.getElementById('sortSalesOld').onclick = () => { salesFilter.sort = 'oldest'; renderSales(); };
+    document.getElementById('sortSalesHigh').onclick = () => { salesFilter.sort = 'highest'; renderSales(); };
+    document.getElementById('clearSalesFilter').onclick = () => {
+        document.getElementById('salesSearch').value = '';
+        document.getElementById('paymentFilter').value = '';
+        document.getElementById('dateFilter').value = '';
+        salesFilter = { search: '', payment: '', date: '', sort: 'newest' };
+        renderSales();
+    };
+    
+    // Purchase filters
+    document.getElementById('purchaseSearch').oninput = (e) => { purchaseFilter.search = e.target.value; renderPurchase(); };
+    document.getElementById('billTypeFilter').onchange = (e) => { purchaseFilter.billType = e.target.value; renderPurchase(); };
+    document.getElementById('purchaseDateFilter').onchange = (e) => { purchaseFilter.date = e.target.value; renderPurchase(); };
+    document.getElementById('sortPurchaseNew').onclick = () => { purchaseFilter.sort = 'newest'; renderPurchase(); };
+    document.getElementById('sortPurchaseOld').onclick = () => { purchaseFilter.sort = 'oldest'; renderPurchase(); };
+    document.getElementById('sortPurchaseHigh').onclick = () => { purchaseFilter.sort = 'highest'; renderPurchase(); };
+    document.getElementById('clearPurchaseFilter').onclick = () => {
+        document.getElementById('purchaseSearch').value = '';
+        document.getElementById('billTypeFilter').value = '';
+        document.getElementById('purchaseDateFilter').value = '';
+        purchaseFilter = { search: '', billType: '', date: '', sort: 'newest' };
+        renderPurchase();
+    };
+    
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.onclick = () => switchTab(tab.getAttribute('data-tab'));
+    });
+    
+    window.onclick = (e) => {
+        if (e.target.classList.contains('modal')) e.target.classList.remove('active');
+    };
+    
+    loadData();
+</script>
+</body>
+</html>

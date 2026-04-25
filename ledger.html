@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JP Jewellers | Ledger System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #eef2f5;
+            font-family: 'Arial', 'Helvetica', 'Segoe UI', sans-serif;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .ledger-container {
+            max-width: 1400px;
+            width: 100%;
+            background: white;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .ledger-invoice {
+            padding: 20px 25px 25px 25px;
+            background: white;
+        }
+
+        /* Header - exactly like invoice.html */
+        .vendor-header {
+            border: 1px solid #000;
+            padding: 12px 15px;
+            margin-bottom: 18px;
+            background: #fefefe;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .company-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .company-icon {
+            width: 33px;
+            height: 33px;
+            border-radius: 8px;
+            background: #1e466e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .company-icon .no-image {
+            font-size: 16px;
+            color: white;
+            font-weight: bold;
+        }
+        .vendor-name {
+            font-size: 18px;
+            font-weight: 800;
+            color: #1e466e;
+        }
+        .vendor-details {
+            font-size: 10px;
+            line-height: 1.4;
+            color: #2c3e50;
+            margin-top: 5px;
+        }
+        .buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+        .btn:hover { opacity: 0.85; transform: translateY(-1px); }
+        .btn-green { background: #28a745; color: white; }
+        .btn-blue { background: #1e466e; color: white; }
+        .btn-gray { background: #6c757d; color: white; }
+        .btn-purple { background: #6f42c1; color: white; }
+
+        /* Tabs (same as index.html) */
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #000;
+        }
+        .tab {
+            padding: 10px 25px;
+            background: #f0f2f5;
+            border: 1px solid #aaa;
+            border-bottom: none;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 8px 8px 0 0;
+            font-size: 13px;
+        }
+        .tab i { margin-right: 6px; }
+        .tab.active {
+            background: #1e466e;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Stats cards */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            border: 1px solid #000;
+            padding: 15px;
+            background: white;
+        }
+        .stat-card h4 {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        .stat-card .value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #1e466e;
+        }
+
+        /* Filters */
+        .filters {
+            border: 1px solid #000;
+            padding: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            background: #fafafa;
+        }
+        .search-box {
+            border: 1px solid #aaa;
+            padding: 6px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            background: white;
+        }
+        .search-box input {
+            border: none;
+            outline: none;
+            width: 100%;
+        }
+        .filter-select {
+            padding: 6px 10px;
+            border: 1px solid #aaa;
+            background: white;
+        }
+
+        /* Table */
+        .table-wrapper {
+            border: 1px solid #000;
+            overflow-x: auto;
+            background: white;
+            margin-top: 15px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background: #e9ecef;
+            font-weight: bold;
+        }
+        tr:hover {
+            background: #f5f5f5;
+        }
+        .empty-row {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+        .balance-positive {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .balance-negative {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .badge-debit { background: #dc3545; color: white; }
+        .badge-credit { background: #28a745; color: white; }
+
+        /* Summary Box */
+        .summary-box {
+            background: #f8f9fa;
+            padding: 15px;
+            margin-top: 20px;
+            border: 1px solid #000;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .summary-item {
+            font-size: 13px;
+        }
+        .summary-item strong {
+            color: #1e466e;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            z-index: 1001;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @media print {
+            .header .buttons, .filters, .tabs, .btn { display: none !important; }
+            body { background: white; padding: 0; }
+        }
+    </style>
+</head>
+<body>
+<div class="ledger-container">
+    <div class="ledger-invoice">
+        <!-- Header exactly like invoice.html -->
+        <div class="vendor-header">
+            <div>
+                <div class="company-header">
+                    <div class="company-icon"><div class="no-image">JP</div></div>
+                    <div class="vendor-name">J.P JEWELLERS - Ledger System</div>
+                </div>
+                <div class="vendor-details">
+                    <strong>GSTIN:</strong> 09ATUPP1565AIZF | Lalganj, Bairia, Ballia - 277216
+                </div>
+            </div>
+            <div class="buttons">
+                <button class="btn btn-purple" id="backToDashboard"><i class="fas fa-arrow-left"></i> Dashboard</button>
+                <button class="btn btn-green" id="exportLedgerBtn"><i class="fas fa-download"></i> Export</button>
+                <button class="btn btn-blue" id="printLedgerBtn"><i class="fas fa-print"></i> Print</button>
+                <button class="btn btn-gray" id="refreshLedgerBtn"><i class="fas fa-sync"></i> Refresh</button>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <div class="tab active" data-tab="customer">👥 Customer Ledger</div>
+            <div class="tab" data-tab="supplier">🚚 Supplier Ledger</div>
+            <div class="tab" data-tab="gst">💰 GST Summary</div>
+            <div class="tab" data-tab="profit">📈 Profit Summary</div>
+            <div class="tab" data-tab="all">📋 All Transactions</div>
+        </div>
+
+        <!-- Customer Ledger Tab -->
+        <div id="customerTab" class="tab-content active">
+            <div class="stats">
+                <div class="stat-card"><h4>Total Receivables</h4><div class="value" id="totalReceivables">₹0</div></div>
+                <div class="stat-card"><h4>Total Customers</h4><div class="value" id="totalCustomers">0</div></div>
+                <div class="stat-card"><h4>Total Sales</h4><div class="value" id="totalSalesAmt">₹0</div></div>
+                <div class="stat-card"><h4>Avg Invoice</h4><div class="value" id="avgInvoice">₹0</div></div>
+            </div>
+            <div class="filters">
+                <div class="search-box"><i class="fas fa-search"></i><input type="text" id="customerSearch" placeholder="Search customer, invoice..."></div>
+                <select id="customerSelect" class="filter-select"><option value="">All Customers</option></select>
+                <input type="date" id="customerFromDate" class="filter-select">
+                <input type="date" id="customerToDate" class="filter-select">
+                <button class="btn-gray btn" id="clearCustomerFilter" style="padding:6px 12px;">Clear</button>
+            </div>
+            <div class="table-wrapper">
+                <table id="customerTable">
+                    <thead><tr><th>Date</th><th>Particulars</th><th>Invoice No</th><th>Debit (₹)</th><th>Credit (₹)</th><th>Balance (₹)</th></tr></thead>
+                    <tbody id="customerLedgerBody"><tr><td colspan="6" class="empty-row">Loading...</td></tr></tbody>
+                </table>
+            </div>
+            <div class="summary-box" id="customerSummary">
+                <div class="summary-item"><strong>Opening Balance:</strong> <span id="custOpening">₹0</span></div>
+                <div class="summary-item"><strong>Total Debit:</strong> <span id="custTotalDebit">₹0</span></div>
+                <div class="summary-item"><strong>Total Credit:</strong> <span id="custTotalCredit">₹0</span></div>
+                <div class="summary-item"><strong>Closing Balance:</strong> <span id="custClosing">₹0</span></div>
+            </div>
+        </div>
+
+        <!-- Supplier Ledger Tab -->
+        <div id="supplierTab" class="tab-content">
+            <div class="stats">
+                <div class="stat-card"><h4>Total Payables</h4><div class="value" id="totalPayables">₹0</div></div>
+                <div class="stat-card"><h4>Total Suppliers</h4><div class="value" id="totalSuppliers">0</div></div>
+                <div class="stat-card"><h4>Total Purchases</h4><div class="value" id="totalPurchasesAmt">₹0</div></div>
+                <div class="stat-card"><h4>Avg Purchase</h4><div class="value" id="avgPurchaseAmt">₹0</div></div>
+            </div>
+            <div class="filters">
+                <div class="search-box"><i class="fas fa-search"></i><input type="text" id="supplierSearch" placeholder="Search supplier, bill..."></div>
+                <select id="supplierSelect" class="filter-select"><option value="">All Suppliers</option></select>
+                <input type="date" id="supplierFromDate" class="filter-select">
+                <input type="date" id="supplierToDate" class="filter-select">
+                <button class="btn-gray btn" id="clearSupplierFilter" style="padding:6px 12px;">Clear</button>
+            </div>
+            <div class="table-wrapper">
+                <table><thead><tr><th>Date</th><th>Particulars</th><th>Bill No</th><th>Debit (₹)</th><th>Credit (₹)</th><th>Balance (₹)</th></tr></thead>
+                <tbody id="supplierLedgerBody"></tbody></table>
+            </div>
+            <div class="summary-box"><div class="summary-item"><strong>Opening Balance:</strong> <span id="suppOpening">₹0</span></div>
+                <div class="summary-item"><strong>Total Debit:</strong> <span id="suppTotalDebit">₹0</span></div>
+                <div class="summary-item"><strong>Total Credit:</strong> <span id="suppTotalCredit">₹0</span></div>
+                <div class="summary-item"><strong>Closing Balance:</strong> <span id="suppClosing">₹0</span></div>
+            </div>
+        </div>
+
+        <!-- GST Summary Tab -->
+        <div id="gstTab" class="tab-content">
+            <div class="stats">
+                <div class="stat-card"><h4>GST Collected</h4><div class="value" id="gstCollected">₹0</div></div>
+                <div class="stat-card"><h4>GST Paid</h4><div class="value" id="gstPaid">₹0</div></div>
+                <div class="stat-card"><h4>GST Payable</h4><div class="value" id="gstPayable">₹0</div></div>
+                <div class="stat-card"><h4>Total Turnover</h4><div class="value" id="totalTurnover">₹0</div></div>
+            </div>
+            <div class="filters">
+                <input type="date" id="gstFromDate" class="filter-select">
+                <input type="date" id="gstToDate" class="filter-select">
+                <button class="btn-primary btn" id="filterGstBtn" style="background:#1e466e;color:white;">Filter</button>
+            </div>
+            <div class="table-wrapper">
+                <table><thead><tr><th>Month</th><th>Sales (₹)</th><th>CGST (1.5%)</th><th>SGST (1.5%)</th><th>Total GST</th><th>Input GST</th><th>Net Payable</th></tr></thead>
+                <tbody id="gstSummaryBody"></tbody></table>
+            </div>
+        </div>
+
+        <!-- Profit Summary Tab -->
+        <div id="profitTab" class="tab-content">
+            <div class="stats">
+                <div class="stat-card"><h4>Total Revenue</h4><div class="value" id="profitRevenue">₹0</div></div>
+                <div class="stat-card"><h4>Total Cost</h4><div class="value" id="profitCost">₹0</div></div>
+                <div class="stat-card"><h4>Gross Profit</h4><div class="value" id="profitGross">₹0</div></div>
+                <div class="stat-card"><h4>Profit Margin</h4><div class="value" id="profitMargin">0%</div></div>
+            </div>
+            <div class="filters">
+                <input type="date" id="profitFromDate" class="filter-select">
+                <input type="date" id="profitToDate" class="filter-select">
+                <button class="btn-primary btn" id="filterProfitBtn" style="background:#1e466e;color:white;">Calculate</button>
+            </div>
+            <div class="table-wrapper">
+                <table><thead><tr><th>Category</th><th>Amount (₹)</th><th>Details</th></tr></thead>
+                <tbody id="profitSummaryBody"></tbody></table>
+            </div>
+        </div>
+
+        <!-- All Transactions Tab -->
+        <div id="allTab" class="tab-content">
+            <div class="filters">
+                <div class="search-box"><i class="fas fa-search"></i><input type="text" id="allSearch" placeholder="Search all transactions..."></div>
+                <input type="date" id="allFromDate" class="filter-select">
+                <input type="date" id="allToDate" class="filter-select">
+                <button class="btn-gray btn" id="clearAllFilter" style="padding:6px 12px;">Clear</button>
+            </div>
+            <div class="table-wrapper">
+                <table><thead><tr><th>Date</th><th>Type</th><th>Name</th><th>Particulars</th><th>Invoice No</th><th>Debit</th><th>Credit</th><th>Balance</th></tr></thead>
+                <tbody id="allTransactionsBody"></tbody></table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --------------------------------------------------------------
+    // 1) LOAD DATA FROM localStorage (same keys as your app)
+    // --------------------------------------------------------------
+    let salesData = [];
+    let purchaseData = [];
+    let ledgerEntries = [];
+
+    function loadData() {
+        let storedSales = localStorage.getItem('jp_jewellers_invoices_list');
+        if (storedSales) {
+            try { salesData = JSON.parse(storedSales); if (!Array.isArray(salesData)) salesData = []; } catch(e){ salesData = []; }
+        } else { salesData = []; }
+
+        let storedPurchases = localStorage.getItem('jp_purchases_list');
+        if (storedPurchases) {
+            try { purchaseData = JSON.parse(storedPurchases); if (!Array.isArray(purchaseData)) purchaseData = []; } catch(e){ purchaseData = []; }
+        } else { purchaseData = []; }
+
+        generateLedgerEntries();
+        updateStats();
+        populateSelectors();
+    }
+
+    function formatDateToYMD(dateStr) {
+        if (!dateStr) return new Date().toISOString().split('T')[0];
+        if (dateStr.includes('/')) {
+            let parts = dateStr.split('/');
+            if (parts.length === 3) return `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
+        }
+        return dateStr;
+    }
+    function formatDateToDMY(dateStr) {
+        if (!dateStr) return '-';
+        if (dateStr.includes('-')) {
+            let parts = dateStr.split('-');
+            if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        }
+        return dateStr;
+    }
+    function toNum(v) { let n = parseFloat(v); return isNaN(n) ? 0 : n; }
+    function formatINR(n) { return '₹' + n.toFixed(2); }
+    function showToast(msg) {
+        let toast = document.createElement('div'); toast.className = 'toast'; toast.innerHTML = msg;
+        document.body.appendChild(toast); setTimeout(() => toast.remove(), 2500);
+    }
+
+    // --------------------------------------------------------------
+    // 2) GENERATE LEDGER ENTRIES (Debit/Credit per transaction)
+    // --------------------------------------------------------------
+    function generateLedgerEntries() {
+        ledgerEntries = [];
+        // Sales: Debit Customer, Credit Sales Account, Credit GST
+        salesData.forEach(inv => {
+            let date = formatDateToYMD(inv.date || new Date().toLocaleDateString('en-IN'));
+            let invNo = inv.invoiceNo || '-';
+            let total = toNum(inv.amount);
+            let taxable = toNum(inv.subtotal || total); // fallback
+            let gst = total - taxable;
+            if (gst < 0) gst = taxable * 0.03; // approx
+
+            // Debit Customer
+            ledgerEntries.push({ id: Date.now()+Math.random(), date, type: 'Customer', name: inv.customerName || 'Unknown', particulars: `Sales - ${invNo}`, invoiceNo: invNo, debit: total, credit: 0, timestamp: new Date(date).getTime() });
+            // Credit Sales Account (Revenue)
+            ledgerEntries.push({ id: Date.now()+Math.random(), date, type: 'Income', name: 'Sales Account', particulars: `Sale to ${inv.customerName}`, invoiceNo: invNo, debit: 0, credit: taxable, timestamp: new Date(date).getTime() });
+            // Credit GST
+            ledgerEntries.push({ id: Date.now()+Math.random(), date, type: 'GST', name: 'GST Payable', particulars: `GST on Sale ${invNo}`, invoiceNo: invNo, debit: 0, credit: gst, timestamp: new Date(date).getTime() });
+        });
+
+        // Purchase: Debit Purchase Account, Credit Supplier
+        purchaseData.forEach(pur => {
+            let date = formatDateToYMD(pur.purchaseDate || pur.date || new Date().toLocaleDateString('en-IN'));
+            let billNo = pur.purchaseNo || pur.billNumber || '-';
+            let total = toNum(pur.amount);
+            // Debit Purchase Account
+            ledgerEntries.push({ id: Date.now()+Math.random(), date, type: 'Expense', name: 'Purchase Account', particulars: `Purchase - ${billNo}`, invoiceNo: billNo, debit: total, credit: 0, timestamp: new Date(date).getTime() });
+            // Credit Supplier
+            ledgerEntries.push({ id: Date.now()+Math.random(), date, type: 'Supplier', name: pur.partyName || 'Unknown Supplier', particulars: `Purchase Bill ${billNo}`, invoiceNo: billNo, debit: 0, credit: total, timestamp: new Date(date).getTime() });
+        });
+
+        ledgerEntries.sort((a,b)=>a.timestamp - b.timestamp);
+        // running balance per ledger (Customer, Supplier, etc.)
+        let balances = {};
+        ledgerEntries.forEach(e => {
+            let key = e.type + '-' + e.name;
+            if (!balances[key]) balances[key] = 0;
+            if (e.debit > 0) balances[key] += e.debit;
+            else if (e.credit > 0) balances[key] -= e.credit;
+            e.balance = balances[key];
+        });
+    }
+
+    function updateStats() {
+        let totalSales = salesData.reduce((s,i)=>s+toNum(i.amount),0);
+        let totalPurchases = purchaseData.reduce((s,i)=>s+toNum(i.amount),0);
+        let customers = [...new Set(salesData.map(i=>i.customerName).filter(Boolean))];
+        let suppliers = [...new Set(purchaseData.map(i=>i.partyName).filter(Boolean))];
+        document.getElementById('totalReceivables').innerHTML = formatINR(totalSales);
+        document.getElementById('totalCustomers').innerText = customers.length;
+        document.getElementById('totalSalesAmt').innerHTML = formatINR(totalSales);
+        document.getElementById('avgInvoice').innerHTML = formatINR(salesData.length ? totalSales/salesData.length : 0);
+        document.getElementById('totalPayables').innerHTML = formatINR(totalPurchases);
+        document.getElementById('totalSuppliers').innerText = suppliers.length;
+        document.getElementById('totalPurchasesAmt').innerHTML = formatINR(totalPurchases);
+        document.getElementById('avgPurchaseAmt').innerHTML = formatINR(purchaseData.length ? totalPurchases/purchaseData.length : 0);
+    }
+
+    function populateSelectors() {
+        let customers = [...new Set(salesData.map(i=>i.customerName).filter(Boolean))];
+        let custSel = document.getElementById('customerSelect');
+        custSel.innerHTML = '<option value="">All Customers</option>';
+        customers.forEach(c => custSel.innerHTML += `<option value="${c}">${c}</option>`);
+
+        let suppliers = [...new Set(purchaseData.map(i=>i.partyName).filter(Boolean))];
+        let supSel = document.getElementById('supplierSelect');
+        supSel.innerHTML = '<option value="">All Suppliers</option>';
+        suppliers.forEach(s => supSel.innerHTML += `<option value="${s}">${s}</option>`);
+    }
+
+    // --------------------------------------------------------------
+    // 3) RENDER FUNCTIONS
+    // --------------------------------------------------------------
+    function renderCustomerLedger() {
+        let search = document.getElementById('customerSearch').value.toLowerCase();
+        let cust = document.getElementById('customerSelect').value;
+        let from = document.getElementById('customerFromDate').value;
+        let to = document.getElementById('customerToDate').value;
+        let filtered = ledgerEntries.filter(e => e.type === 'Customer');
+        if (cust) filtered = filtered.filter(e => e.name === cust);
+        if (search) filtered = filtered.filter(e => e.name.toLowerCase().includes(search) || e.invoiceNo.toLowerCase().includes(search));
+        if (from) filtered = filtered.filter(e => e.date >= from);
+        if (to) filtered = filtered.filter(e => e.date <= to);
+
+        let tbody = document.getElementById('customerLedgerBody');
+        if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="6" class="empty-row">No transactions found</td></tr>'; return; }
+        let totalDebit=0, totalCredit=0;
+        tbody.innerHTML = filtered.map(e => {
+            totalDebit += e.debit; totalCredit += e.credit;
+            return `<tr><td>${formatDateToDMY(e.date)}</td><td>${e.particulars}</td><td>${e.invoiceNo}</td>
+                    <td>${e.debit>0?formatINR(e.debit):'-'}</td><td>${e.credit>0?formatINR(e.credit):'-'}</td>
+                    <td class="${e.balance>0?'balance-positive':e.balance<0?'balance-negative':''}">${formatINR(Math.abs(e.balance))} ${e.balance>0?'Dr':e.balance<0?'Cr':''}</td></tr>`;
+        }).join('');
+        let closing = totalDebit - totalCredit;
+        document.getElementById('custOpening').innerHTML = formatINR(0);
+        document.getElementById('custTotalDebit').innerHTML = formatINR(totalDebit);
+        document.getElementById('custTotalCredit').innerHTML = formatINR(totalCredit);
+        document.getElementById('custClosing').innerHTML = formatINR(Math.abs(closing)) + (closing>0?' Dr':closing<0?' Cr':'');
+    }
+
+    function renderSupplierLedger() {
+        let search = document.getElementById('supplierSearch').value.toLowerCase();
+        let supp = document.getElementById('supplierSelect').value;
+        let from = document.getElementById('supplierFromDate').value;
+        let to = document.getElementById('supplierToDate').value;
+        let filtered = ledgerEntries.filter(e => e.type === 'Supplier');
+        if (supp) filtered = filtered.filter(e => e.name === supp);
+        if (search) filtered = filtered.filter(e => e.name.toLowerCase().includes(search) || e.invoiceNo.toLowerCase().includes(search));
+        if (from) filtered = filtered.filter(e => e.date >= from);
+        if (to) filtered = filtered.filter(e => e.date <= to);
+        let tbody = document.getElementById('supplierLedgerBody');
+        if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="6" class="empty-row">No transactions found</td></tr>'; return; }
+        let totalDebit=0, totalCredit=0;
+        tbody.innerHTML = filtered.map(e => {
+            totalDebit += e.debit; totalCredit += e.credit;
+            return `<tr><td>${formatDateToDMY(e.date)}</td><td>${e.particulars}</td><td>${e.invoiceNo}</td>
+                    <td>${e.debit>0?formatINR(e.debit):'-'}</td><td>${e.credit>0?formatINR(e.credit):'-'}</td>
+                    <td class="${e.balance>0?'balance-positive':e.balance<0?'balance-negative':''}">${formatINR(Math.abs(e.balance))} ${e.balance>0?'Dr':e.balance<0?'Cr':''}</td></tr>`;
+        }).join('');
+        let closing = totalDebit - totalCredit;
+        document.getElementById('suppOpening').innerHTML = formatINR(0);
+        document.getElementById('suppTotalDebit').innerHTML = formatINR(totalDebit);
+        document.getElementById('suppTotalCredit').innerHTML = formatINR(totalCredit);
+        document.getElementById('suppClosing').innerHTML = formatINR(Math.abs(closing)) + (closing>0?' Dr':closing<0?' Cr':'');
+    }
+
+    function renderGSTSummary() {
+        let from = document.getElementById('gstFromDate').value;
+        let to = document.getElementById('gstToDate').value;
+        let monthly = {};
+        let totalCollected=0, totalPaid=0, turnover=0;
+        salesData.forEach(inv => {
+            let d = inv.date || '';
+            let month = d.substring(0,7);
+            if (month && (!from || d>=from) && (!to || d<=to)) {
+                if (!monthly[month]) monthly[month]={sales:0,gst:0};
+                let amt = toNum(inv.amount);
+                monthly[month].sales += amt;
+                monthly[month].gst += amt*0.03;
+                totalCollected += amt*0.03;
+                turnover += amt;
+            }
+        });
+        purchaseData.forEach(pur => {
+            let d = pur.purchaseDate || pur.date || '';
+            let month = d.substring(0,7);
+            if (month && (!from || d>=from) && (!to || d<=to)) {
+                if (!monthly[month]) monthly[month]={sales:0,gst:0,input:0};
+                let amt = toNum(pur.amount);
+                monthly[month].input = (monthly[month].input||0) + amt*0.03;
+                totalPaid += amt*0.03;
+            }
+        });
+        let tbody = document.getElementById('gstSummaryBody');
+        tbody.innerHTML = Object.entries(monthly).map(([m,data])=>{
+            let net = (data.gst||0) - (data.input||0);
+            return `<tr><td>${m}</td><td>${formatINR(data.sales||0)}</td><td>${formatINR((data.sales||0)*0.015)}</td><td>${formatINR((data.sales||0)*0.015)}</td>
+                    <td>${formatINR(data.gst||0)}</td><td>${formatINR(data.input||0)}</td><td class="${net>0?'balance-positive':'balance-negative'}">${formatINR(Math.abs(net))}</td></tr>`;
+        }).join('');
+        document.getElementById('gstCollected').innerHTML = formatINR(totalCollected);
+        document.getElementById('gstPaid').innerHTML = formatINR(totalPaid);
+        document.getElementById('gstPayable').innerHTML = formatINR(totalCollected-totalPaid);
+        document.getElementById('totalTurnover').innerHTML = formatINR(turnover);
+    }
+
+    function renderProfitSummary() {
+        let from = document.getElementById('profitFromDate').value;
+        let to = document.getElementById('profitToDate').value;
+        let revenue=0, cost=0;
+        salesData.forEach(inv => { let d=inv.date||''; if((!from||d>=from) && (!to||d<=to)) revenue += toNum(inv.amount); });
+        purchaseData.forEach(pur => { let d=pur.purchaseDate||pur.date||''; if((!from||d>=from) && (!to||d<=to)) cost += toNum(pur.amount); });
+        let profit = revenue - cost;
+        let margin = revenue>0 ? (profit/revenue*100).toFixed(2) : 0;
+        document.getElementById('profitRevenue').innerHTML = formatINR(revenue);
+        document.getElementById('profitCost').innerHTML = formatINR(cost);
+        document.getElementById('profitGross').innerHTML = formatINR(profit);
+        document.getElementById('profitMargin').innerHTML = margin+'%';
+        let tbody = document.getElementById('profitSummaryBody');
+        tbody.innerHTML = `<tr><td><strong>Sales Revenue</strong></td><td>${formatINR(revenue)}</td><td>Total from ${salesData.length} invoices</td></tr>
+                           <tr><td><strong>Cost of Goods Sold</strong></td><td>${formatINR(cost)}</td><td>Total from ${purchaseData.length} purchases</td></tr>
+                           <tr style="border-top:2px solid #ddd;"><td><strong>Gross Profit</strong></td><td class="balance-positive">${formatINR(profit)}</td><td>Revenue - Cost</td></tr>
+                           <tr><td><strong>Profit Margin</strong></td><td><strong>${margin}%</strong></td><td>(Gross Profit / Revenue) × 100</td></tr>`;
+    }
+
+    function renderAllTransactions() {
+        let search = document.getElementById('allSearch').value.toLowerCase();
+        let from = document.getElementById('allFromDate').value;
+        let to = document.getElementById('allToDate').value;
+        let filtered = [...ledgerEntries];
+        if (search) filtered = filtered.filter(e => e.particulars.toLowerCase().includes(search) || e.name.toLowerCase().includes(search) || e.invoiceNo.toLowerCase().includes(search));
+        if (from) filtered = filtered.filter(e => e.date >= from);
+        if (to) filtered = filtered.filter(e => e.date <= to);
+        let tbody = document.getElementById('allTransactionsBody');
+        if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="8" class="empty-row">No transactions found</td></tr>'; return; }
+        tbody.innerHTML = filtered.map(e => `<tr>
+            <td>${formatDateToDMY(e.date)}</td>
+            <td><span class="badge ${e.debit>0?'badge-debit':'badge-credit'}">${e.type}</span></td>
+            <td>${e.name}</td><td>${e.particulars}</td><td>${e.invoiceNo}</td>
+            <td>${e.debit>0?formatINR(e.debit):'-'}</td><td>${e.credit>0?formatINR(e.credit):'-'}</td>
+            <td>${formatINR(Math.abs(e.balance))} ${e.balance>0?'Dr':e.balance<0?'Cr':''}</td>
+        </tr>`).join('');
+    }
+
+    function setDefaultDates() {
+        let today = new Date();
+        let first = new Date(today.getFullYear(), today.getMonth(), 1);
+        let last = new Date(today.getFullYear(), today.getMonth()+1, 0);
+        document.getElementById('customerFromDate').valueAsDate = first;
+        document.getElementById('customerToDate').valueAsDate = last;
+        document.getElementById('supplierFromDate').valueAsDate = first;
+        document.getElementById('supplierToDate').valueAsDate = last;
+        document.getElementById('gstFromDate').valueAsDate = first;
+        document.getElementById('gstToDate').valueAsDate = last;
+        document.getElementById('profitFromDate').valueAsDate = first;
+        document.getElementById('profitToDate').valueAsDate = last;
+        document.getElementById('allFromDate').valueAsDate = first;
+        document.getElementById('allToDate').valueAsDate = last;
+    }
+
+    function attachEvents() {
+        document.getElementById('customerSearch').oninput = renderCustomerLedger;
+        document.getElementById('customerSelect').onchange = renderCustomerLedger;
+        document.getElementById('customerFromDate').onchange = renderCustomerLedger;
+        document.getElementById('customerToDate').onchange = renderCustomerLedger;
+        document.getElementById('clearCustomerFilter').onclick = () => {
+            document.getElementById('customerSearch').value=''; document.getElementById('customerSelect').value='';
+            document.getElementById('customerFromDate').value=''; document.getElementById('customerToDate').value='';
+            setDefaultDates(); renderCustomerLedger();
+        };
+        document.getElementById('supplierSearch').oninput = renderSupplierLedger;
+        document.getElementById('supplierSelect').onchange = renderSupplierLedger;
+        document.getElementById('supplierFromDate').onchange = renderSupplierLedger;
+        document.getElementById('supplierToDate').onchange = renderSupplierLedger;
+        document.getElementById('clearSupplierFilter').onclick = () => {
+            document.getElementById('supplierSearch').value=''; document.getElementById('supplierSelect').value='';
+            document.getElementById('supplierFromDate').value=''; document.getElementById('supplierToDate').value='';
+            setDefaultDates(); renderSupplierLedger();
+        };
+        document.getElementById('filterGstBtn').onclick = renderGSTSummary;
+        document.getElementById('filterProfitBtn').onclick = renderProfitSummary;
+        document.getElementById('allSearch').oninput = renderAllTransactions;
+        document.getElementById('allFromDate').onchange = renderAllTransactions;
+        document.getElementById('allToDate').onchange = renderAllTransactions;
+        document.getElementById('clearAllFilter').onclick = () => {
+            document.getElementById('allSearch').value=''; document.getElementById('allFromDate').value=''; document.getElementById('allToDate').value='';
+            setDefaultDates(); renderAllTransactions();
+        };
+        document.getElementById('backToDashboard').onclick = () => window.location.href='index.html';
+        document.getElementById('refreshLedgerBtn').onclick = () => { loadData(); renderAll(); showToast('🔄 Refreshed'); };
+        document.getElementById('printLedgerBtn').onclick = () => window.print();
+        document.getElementById('exportLedgerBtn').onclick = () => {
+            let data = { sales:salesData, purchases:purchaseData, ledger:ledgerEntries };
+            let blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+            let a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `jp_ledger_${new Date().toISOString().split('T')[0]}.json`;
+            a.click(); showToast('✅ Ledger exported');
+        };
+    }
+    function renderAll() { renderCustomerLedger(); renderSupplierLedger(); renderGSTSummary(); renderProfitSummary(); renderAllTransactions(); }
+
+    // Tab switching
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+            tab.classList.add('active');
+            document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+            document.getElementById(tab.dataset.tab+'Tab').classList.add('active');
+            renderAll();
+        });
+    });
+
+    // Initialise
+    loadData();
+    setDefaultDates();
+    attachEvents();
+    renderAll();
+</script>
+</body>
+</html>
